@@ -97,7 +97,7 @@ void ScreenTestLights::Update( float fDeltaTime )
 	else
 	{
 		CString sGameButton = GAMESTATE->GetCurrentGame()->m_szButtonNames[m_CurGameButton];
-		s += ssprintf( "controller light: P%d %d %s\n", m_CurGameController+1, m_CurGameButton, sGameButton.c_str() );
+		s += ssprintf( "controller light (light name is wrong): P%d %d %s\n", m_CurGameController+1, m_CurGameButton, sGameButton.c_str() );
 	}
 
 	m_textInputs.SetText( s );

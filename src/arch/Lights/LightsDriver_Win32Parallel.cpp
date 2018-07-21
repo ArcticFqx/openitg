@@ -60,7 +60,6 @@ void LightsDriver_Win32Parallel::Set( const LightsState *ls )
 
 	for( int i=0; i<MAX_PARALLEL_PORTS; i++ )
 	{
-		LOG->Trace( "Address: %03X, %02X", LPT_ADDRESS[i], OUT_DATA[i] );
 		PortOut( LPT_ADDRESS[i], OUT_DATA[i] );
 	}
 }

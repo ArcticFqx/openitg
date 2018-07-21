@@ -1,4 +1,5 @@
 #include "global.h"
+#include "Game.h"
 #include "GameState.h"
 #include "GameManager.h"
 #include "InputMapper.h"
@@ -93,6 +94,9 @@ LightsManager::LightsManager()
 	m_fTestAutoCycleCurrentIndex = 0;
 	m_clTestManualCycleCurrent = LIGHT_INVALID;
 	m_iControllerTestManualCycleCurrent = -1;
+
+	hack_curGame = "";
+	hack_dance = 6;
 }
 
 LightsManager::~LightsManager()
@@ -397,7 +401,7 @@ void LightsManager::Update( float fDeltaTime )
 					if( !GAMESTATE->m_bSideIsJoined[gc] )
 						continue;
 
-					FOREACH_GameButton_Custom( gb )
+					FOREACH_GameButton( gb )
 					{
 						bool bOn = INPUTMAPPER->IsButtonDown( GameInput(gc,gb) );
 						m_LightsState.m_bGameButtonLights[gc][gb] = bOn;
@@ -439,10 +443,58 @@ void LightsManager::Update( float fDeltaTime )
 	default:
 		ASSERT(0);
 	}
+	
+	hack_remapLights();
 
 	// apply new light values we set above
 	FOREACH( LightsDriver*, m_vpDrivers, iter )
 		(*iter)->Set( &m_LightsState );
+}
+
+void LightsManager::hack_remapLights()
+{
+	const Game* currentGame = GAMESTATE->GetCurrentGame();
+	const bool isDance = currentGame->m_szName == hack_dance;
+	const int buttonsPerController = isDance ? 6 : (currentGame->m_iButtonsPerController - GAME_BUTTON_NEXT);
+
+	// Regen remap table if game has changed
+	if (hack_curGame != currentGame->m_szName) {
+		hack_createRemap(buttonsPerController);
+		hack_curGame = CString(currentGame->m_szName);
+	}
+
+	FOREACH_GameController(gc)
+	{
+		for (int i = 0; i < MAX_GAME_BUTTONS; i++)
+			hack_temp[hack_inputToLightsRemap[i]] = m_LightsState.m_bGameButtonLights[gc][i];
+
+		for (int i = 0; i < MAX_GAME_BUTTONS; i++)
+			m_LightsState.m_bGameButtonLights[gc][i] = hack_temp[i];
+	}
+}
+
+void LightsManager::hack_createRemap(const int buttonsPerController)
+{
+	GameButton gb = GAME_BUTTON_NEXT;
+	int i = 0;
+	for (; i < buttonsPerController; i++) {
+		hack_inputToLightsRemap[gb] = i;
+		enum_add<GameButton>(gb, +1);
+	}
+
+	hack_inputToLightsRemap[GAME_BUTTON_START] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_SELECT] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_BACK] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_MENULEFT] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_MENURIGHT] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_MENUUP] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_MENUDOWN] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_COIN] = i++;
+	hack_inputToLightsRemap[GAME_BUTTON_OPERATOR] = i++;
+
+	for (; gb < MAX_GAME_BUTTONS; enum_add<GameButton>(gb, +1)) {
+		hack_inputToLightsRemap[gb] = i++;
+	}
 }
 
 void LightsManager::BlinkCabinetLight( CabinetLight cl, float fLength )

@@ -104,6 +104,14 @@ private:
 	float			m_fTestAutoCycleCurrentIndex;
 	CabinetLight	m_clTestManualCycleCurrent;
 	int				m_iControllerTestManualCycleCurrent;
+
+	// Pretty bad, but is implemented to retain compatability with existing assumptions in drivers
+	int hack_inputToLightsRemap[MAX_GAME_BUTTONS];
+	bool hack_temp[MAX_GAME_BUTTONS];
+	void hack_remapLights();
+	void hack_createRemap(const int buttonsPerController);
+	CString hack_curGame;
+	CString hack_dance;
 };
 
 
