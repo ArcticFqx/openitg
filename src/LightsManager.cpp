@@ -454,7 +454,7 @@ void LightsManager::Update( float fDeltaTime )
 void LightsManager::hack_remapLights()
 {
 	const Game* currentGame = GAMESTATE->GetCurrentGame();
-	const bool isDance = currentGame->m_szName == hack_dance;
+	const bool isDance = currentGame->m_szName == CString("dance");
 	const int buttonsPerController = isDance ? 6 : (currentGame->m_iButtonsPerController - GAME_BUTTON_NEXT);
 
 	// Regen remap table if game has changed
