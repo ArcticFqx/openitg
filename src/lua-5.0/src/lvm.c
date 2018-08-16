@@ -360,7 +360,7 @@ static void Arith (lua_State *L, StkId ra,
 		  const TObject *f = luaH_getstr(hvalue(gt(L)), G(L)->tmname[TM_MOD]);
 		  ptrdiff_t res = savestack(L, ra);
 		  if (!ttisfunction(f))
-			  luaG_runerror(L, "`__mod' (`%' operator) is not a function");
+			  luaG_runerror(L, "`__mod' (`%%' operator) is not a function");
 		  callTMres(L, f, b, c);
 		  ra = restorestack(L, res);  /* previous call may change stack */
 		  setobjs2s(ra, L->top);
