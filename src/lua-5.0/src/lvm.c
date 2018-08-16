@@ -356,6 +356,16 @@ static void Arith (lua_State *L, StkId ra,
       case TM_SUB: setnvalue(ra, nvalue(b) - nvalue(c)); break;
       case TM_MUL: setnvalue(ra, nvalue(b) * nvalue(c)); break;
       case TM_DIV: setnvalue(ra, nvalue(b) / nvalue(c)); break;
+	  case TM_MOD: {
+		  const TObject *f = luaH_getstr(hvalue(gt(L)), G(L)->tmname[TM_MOD]);
+		  ptrdiff_t res = savestack(L, ra);
+		  if (!ttisfunction(f))
+			  luaG_runerror(L, "`__mod' (`%' operator) is not a function");
+		  callTMres(L, f, b, c);
+		  ra = restorestack(L, res);  /* previous call may change stack */
+		  setobjs2s(ra, L->top);
+		  break;
+	  }
       case TM_POW: {
         const TObject *f = luaH_getstr(hvalue(gt(L)), G(L)->tmname[TM_POW]);
         ptrdiff_t res = savestack(L, ra);
@@ -558,6 +568,10 @@ StkId luaV_execute (lua_State *L) {
           Arith(L, ra, rb, rc, TM_DIV);
         break;
       }
+	  case OP_MOD: {
+		  Arith(L, ra, RKB(i), RKC(i), TM_MOD);
+		  break;
+	  }
       case OP_POW: {
         Arith(L, ra, RKB(i), RKC(i), TM_POW);
         break;
@@ -578,6 +592,32 @@ StkId luaV_execute (lua_State *L) {
       case OP_NOT: {
         int res = l_isfalse(RB(i));  /* next assignment may change this value */
         setbvalue(ra, res);
+        break;
+      }
+      case OP_LEN: {
+        const TObject *rb = RB(i);
+        switch(ttype(rb)) {
+          case LUA_TSTRING: {
+			setnvalue(ra, tsvalue(rb)->tsv.len);
+            break;
+          }
+		  case LUA_TTABLE: {
+			  if(!call_binTM(L, rb, &luaO_nilobject, ra, TM_LEN)){
+				  const TObject *f = luaH_getstr(hvalue(gt(L)), G(L)->tmname[TM_LEN]);
+				  ptrdiff_t res = savestack(L, ra);
+				  if (!ttisfunction(f))
+					  luaG_runerror(L, "`__len' (`#' operator) is not a function");
+				  callTMres(L, f, rb, &luaO_nilobject);
+				  ra = restorestack(L, res);  /* previous call may change stack */
+				  setobjs2s(ra, L->top);
+			  }
+			  break;
+		  }
+		  default: {
+			  luaG_typeerror(L, rb, "get length of");
+			  break;
+		  }
+        }
         break;
       }
       case OP_CONCAT: {

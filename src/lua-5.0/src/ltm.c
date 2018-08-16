@@ -29,8 +29,8 @@ void luaT_init (lua_State *L) {
   static const char *const luaT_eventname[] = {  /* ORDER TM */
     "__index", "__newindex",
     "__gc", "__mode", "__eq",
-    "__add", "__sub", "__mul", "__div",
-    "__pow", "__unm", "__lt", "__le",
+    "__add", "__sub", "__mul", "__div", "__mod",
+    "__pow", "__unm", "__len", "__lt", "__le",
     "__concat", "__call"
   };
   int i;

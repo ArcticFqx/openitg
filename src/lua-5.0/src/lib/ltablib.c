@@ -245,6 +245,8 @@ static const luaL_reg tab_funcs[] = {
 
 LUALIB_API int luaopen_table (lua_State *L) {
   luaL_openlib(L, LUA_TABLIBNAME, tab_funcs, 0);
+  lua_pushcfunction(L, luaB_getn);
+  lua_setglobal(L, "__len");
   return 1;
 }
 

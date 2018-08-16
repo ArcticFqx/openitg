@@ -238,8 +238,10 @@ LUALIB_API int luaopen_math (lua_State *L) {
   lua_pushliteral(L, "pi");
   lua_pushnumber(L, PI);
   lua_settable(L, -3);
-  lua_pushliteral(L, "__pow");
+  lua_pushcfunction(L, math_mod);
+  lua_setglobal(L, "__mod");
   lua_pushcfunction(L, math_pow);
+  lua_setglobal(L, "__pow");
   lua_settable(L, LUA_GLOBALSINDEX);
   return 1;
 }

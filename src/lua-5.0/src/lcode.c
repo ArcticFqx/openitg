@@ -574,19 +574,31 @@ void luaK_indexed (FuncState *fs, expdesc *t, expdesc *k) {
 
 
 void luaK_prefix (FuncState *fs, UnOpr op, expdesc *e) {
-  if (op == OPR_MINUS) {
-    luaK_exp2val(fs, e);
-    if (e->k == VK && ttisnumber(&fs->f->k[e->info]))
-      e->info = luaK_numberK(fs, -nvalue(&fs->f->k[e->info]));
-    else {
+  switch(op) {
+    case(OPR_MINUS): {
+      luaK_exp2val(fs, e);
+      if (e->k == VK && ttisnumber(&fs->f->k[e->info]))
+        e->info = luaK_numberK(fs, -nvalue(&fs->f->k[e->info]));
+      else {
+        luaK_exp2anyreg(fs, e);
+        freeexp(fs, e);
+        e->info = luaK_codeABC(fs, OP_UNM, 0, e->info, 0);
+        e->k = VRELOCABLE;
+      }
+      break;
+    }
+    case(OPR_NOT): {
+      codenot(fs, e);
+      break;
+    }
+    case(OPR_LEN): {
       luaK_exp2anyreg(fs, e);
       freeexp(fs, e);
-      e->info = luaK_codeABC(fs, OP_UNM, 0, e->info, 0);
+      e->info = luaK_codeABC(fs, OP_LEN, 0, e->info, 0);
       e->k = VRELOCABLE;
+      break;
     }
   }
-  else  /* op == NOT */
-    codenot(fs, e);
 }
 
 
